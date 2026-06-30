@@ -4,6 +4,8 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+const port = process.env.PORT || 4000
+
 # .envファイルから環境変数を読み込む
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
