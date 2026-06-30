@@ -1,0 +1,29 @@
+name: Run Discord Bot
+
+on:
+  push:
+    branches: [ main ] # mainブランチにコードがプッシュされたら起動
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Bot
+      env:
+        # すでに設定したリポジトリのSecrets（環境変数）の名前をここに書きます
+        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }} 
+      run: python main.py
