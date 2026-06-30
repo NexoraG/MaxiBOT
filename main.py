@@ -1,14 +1,28 @@
 import os
 import random
+import threading
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-
-const port = process.env.PORT || 4000
+from flask import Flask
 
 # .envファイルから環境変数を読み込む
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
+
+app = Flask("")
+
+
+@app.route("/")
+def home():
+    return "Bot is complementary and running!"  # アクセスがあったら適当な文字を返す
+
+
+def run_web_server():
+    # Renderが指定するポート番号を取得（なければデフォルトで8080番）
+    port = int(os.environ.get("PORT", 8080))
+    # 0.0.0.0で待ち受けないと外部（UptimeRobot）からアクセスできません
+    app.run(host="0.0.0.0", port=port)
 
 # Intentsの設定(メッセージ内容を読み取るために必要)
 intents = discord.Intents.default()
@@ -52,6 +66,11 @@ async def on_message(message):
 
     # コマンドも処理できるようにする(これがないと!ping等が反応しなくなる)
     await bot.process_commands(message)
+
+if __name__ == "__main__":
+    # Webサーバーを別スレッド（裏側）で起動
+    t = threading.Thread(target=run_web_server)
+    t.start()
 
 # Botを起動
 bot.run(TOKEN)
