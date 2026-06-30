@@ -1,6 +1,12 @@
+import os
+import random
 import discord
 from discord.ext import commands
-import random
+from dotenv import load_dotenv
+
+# .envファイルから環境変数を読み込む
+load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 # Intentsの設定(メッセージ内容を読み取るために必要)
 intents = discord.Intents.default()
@@ -14,6 +20,13 @@ GREETINGS = ["こんにちは!", "やあ!", "どうも!", "元気?"]
 @bot.event
 async def on_ready():
     print(f"ログインしました: {bot.user}")
+
+    # ステータス(オンライン表示)とアクティビティ(プロフィールの「〜をプレイ中」等)を設定
+    activity = discord.Activity(
+        type=discord.ActivityType.watching,  # playing / listening / watching / competing から選択可
+        name="!ping や !hello で挨拶"
+    )
+    await bot.change_presence(status=discord.Status.online, activity=activity)
 
 # pingコマンド: Botのレイテンシ(応答速度)を表示
 @bot.command()
@@ -38,6 +51,5 @@ async def on_message(message):
     # コマンドも処理できるようにする(これがないと!ping等が反応しなくなる)
     await bot.process_commands(message)
 
-# Botを起動(トークンは環境変数などで管理するのが安全です)
-TOKEN = "TOKEN.env"
+# Botを起動
 bot.run(TOKEN)
