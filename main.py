@@ -45,7 +45,7 @@ async def mobile_identify(self):
             "token": self.token,
             "properties": {
                 "$os": "android",
-                "$browser": "Discord Android",  # ここがスマホマークの肝
+                "$browser": "Discord Android",
                 "$device": "Discord Android",
             },
             "compress": True,
@@ -66,7 +66,12 @@ async def mobile_identify(self):
     if state._intents is not None:
         payload["d"]["intents"] = state._intents.value
 
-    await self.call_identify_throttle()
+    # バージョンによってメソッド名が変わるため存在チェックしてから呼ぶ
+    if hasattr(self, "call_identify_throttle"):
+        await self.call_identify_throttle()
+    elif hasattr(self, "_rate_limiter"):
+        await self._rate_limiter.block()
+
     await self.send_as_json(payload)
 
 DiscordWebSocket.identify = mobile_identify  # パッチ適用(Botより前に書く)
