@@ -83,16 +83,53 @@ bot = commands.Bot(command_prefix="mxi!", intents=intents)
 # 挨拶のバリエーション
 GREETINGS = ["こんにちは!", "やあ!", "どうも!", "元気?"]
 
+# =============================================
+# ローテーションするステータス一覧
+# discord.ActivityとStreamingを混在させてもOK
+# =============================================
+STATUSES = [
+    # (activity, discord.Status)の形式
+    (
+        discord.Activity(type=discord.ActivityType.watching, name="mxi!ping"),
+        discord.Status.online,
+    ),
+    (
+        discord.Activity(type=discord.ActivityType.playing, name="discord.py"),
+        discord.Status.online,
+    ),
+    (
+        discord.Activity(type=discord.ActivityType.listening, name="コマンド待機中..."),
+        discord.Status.idle,
+    ),
+    # Streamingも混ぜられる
+    (
+        discord.Streaming(name="配信中ステータスも混在可能", url="https://www.twitch.tv/dummy"),
+        discord.Status.online,
+    ),
+    (
+        discord.Activity(type=discord.ActivityType.competing, name="Bot選手権"),
+        discord.Status.dnd,
+    ),
+]
+
+# itertools.cycleで無限ループするイテレータを作成
+status_cycle = itertools.cycle(STATUSES)
+
+
+# =============================================
+# tasks.loop: 指定秒ごとに繰り返す処理
+# =============================================
+@tasks.loop(seconds=10)  # ← 秒数はここで変更
+async def rotate_status():
+    activity, status = next(status_cycle)
+    await bot.change_presence(status=status, activity=activity)
+
 @bot.event
 async def on_ready():
     print(f"ログインしました: {bot.user}")
+    rotate_status.start()  
 
-    # ステータス(オンライン表示)とアクティビティ(プロフィールの「〜をプレイ中」等)を設定
-    activity = discord.Activity(
-        type=discord.ActivityType.playing,  # playing / listening / watching / competing から選択可
-        name="MaxiBOT | mxi!ping や mxi!hello で挨拶"
-    )
-    await bot.change_presence(status=discord.Status.online, activity=activity)
+
 
     # --- スラッシュコマンドの同期 ---
     # GUILD_IDがある場合 → そのサーバーだけに即時反映(テスト向き)
