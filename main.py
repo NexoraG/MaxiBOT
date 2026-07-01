@@ -161,6 +161,11 @@ async def ping(ctx):
 async def hello(ctx):
     await ctx.send(f"{random.choice(GREETINGS)} {ctx.author.mention}")
 
+# シェイク(Nudge) (Aerochatなどを対象)
+@bot.command()
+async def nudge(ctx):
+    await ctx.send(f"[nudge]")
+
 # =============================================
 # スラッシュコマンド (/ping, /hello, /info, /echo)
 # =============================================
